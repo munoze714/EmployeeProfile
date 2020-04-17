@@ -10,33 +10,36 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+const teamArray = []
+
 
 // Write code to use inquirer to gather information about the development team members,
-
-inquirer
-    .prompt([
-        /* Pass your questions in here */
-        {
-            type: "list",
-            name: "Role",
-            message: "Whats your Role?",
-            choices: ["Intern", "Engineer", "Manager"],
-        }
-    ])
-    .then(answers => {
-        console.log(answers)
-        // Use user feedback for... whatever!!
-        if (answers.Role === "Engineer") {
-            // console.log("ask engineer questions")
-            engineer();
-        } else if (answers.Role === "Manager") {
-            // console.log("ask manager questions")
-            manager();
-        } else {
-            // console.log("ask intern questions")
-            intern();
-        }
-    })
+function startProfiles() {
+    inquirer
+        .prompt([
+            /* Pass your questions in here */
+            {
+                type: "list",
+                name: "Role",
+                message: "Whats your Role?",
+                choices: ["Intern", "Engineer", "Manager"],
+            }
+        ])
+        .then(answers => {
+            console.log(answers)
+            // Use user feedback for... whatever!!
+            if (answers.Role === "Engineer") {
+                // console.log("ask engineer questions")
+                engineer();
+            } else if (answers.Role === "Manager") {
+                // console.log("ask manager questions")
+                manager();
+            } else {
+                // console.log("ask intern questions")
+                intern();
+            }
+        })
+}
 
 function engineer() {
     inquirer
@@ -58,7 +61,10 @@ function engineer() {
             }
         ]).then(answers => {
             // console.log(answers)
-            Engineer = new Engineer(answers.name, answers.email, answers.github)
+            var createEngineer = new Engineer(answers.name, teamArray.length + 1, answers.email, answers.github)
+            teamArray.push(createEngineer)
+            addMultipleEmployee()
+
         })
 }
 function manager() {
@@ -81,7 +87,9 @@ function manager() {
             }
         ]).then(answers => {
             // console.log(answers)
-            Manager = new Manager(answers.name, answers.email, answers.office)
+            var createManager = new Manager(answers.name, teamArray.length + 1, answers.email, answers.office)
+            teamArray.push(createManager);
+            addMultipleEmployee()
         })
 }
 function intern() {
@@ -104,29 +112,41 @@ function intern() {
             }
         ]).then(answers => {
             // console.log(answers)
-            Intern = new Intern(answers.name, answers.email, answers.school)
+            var createIntern = new Intern(answers.name, teamArray.length + 1, answers.email, answers.school);
+            teamArray.push(createIntern);
+            addMultipleEmployee()
         })
 }
+function addMultipleEmployee() {
+    inquirer
+        .prompt([
+            {
+                type: "confirm",
+                name: "addEmployee",
+                message: "Would you like to add another Employee?",
+            }
+        ])
+        .then(answers => {
+            if (answers.addEmployee === true) {
+                startProfiles()
+            } else {
+                var finalProfile = render(teamArray)
+                console.log(finalProfile)
+                fs.writeFile(outputPath, finalProfile, (err) => {
+
+                })
+            }
+        })
+};
+startProfiles();
 
 
 
 // and to create objects for each team member (using the correct classes as blueprints!)
-
 // After the user has input all employees desired, call the `render` function (required
-
-
-
 // above) and pass in an array containing all employee objects; the `render` function will
-
-
-
 // generate and return a block of HTML including templated divs for each employee!
-
-
 // After you have your html, you're now ready to create an HTML file using the HTML
-
-
-
 // returned from the `render` function. Now write it to a file named `team.html` in the
 // `output` folder. You can use the variable `outputPath` above target this location.
 // Hint: you may need to check if the `output` folder exists and create it if it
